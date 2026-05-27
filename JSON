@@ -1,0 +1,13 @@
+// Firebase Rules
+{
+  "rules": {
+    "messages": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "admin_messages": {
+      ".read": true,
+      ".write": "auth.token.username === 'Behruz'"
+    }
+  }
+}
