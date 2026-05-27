@@ -1,54 +1,45 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Hypershot Login</title>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+<body class="bg-black text-white h-screen flex flex-col">
+    <div id="login-box" class="m-auto p-8 bg-gray-900 rounded-2xl border border-gray-800">
+        <input id="name" placeholder="Ismingiz" class="w-full p-3 bg-black border border-gray-700 rounded-lg mb-4">
+        <button onclick="connect()" class="w-full bg-blue-600 p-3 rounded-lg font-bold">Kirish</button>
+    </div>
 
-    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 id="title" class="text-2xl font-bold mb-6 text-center text-gray-800">Kirish</h2>
-        
-        <div class="space-y-4">
-            <input type="text" id="username" placeholder="Ismingizni kiriting" 
-                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            
-            <input type="password" id="password" placeholder="Parolingizni kiriting" 
-                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            
-            <button id="main-btn" onclick="handleAuth()" 
-                class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition">
-                Kirish
-            </button>
+    <div id="chat-box" class="hidden flex-1 flex flex-col p-4">
+        <div id="messages" class="flex-1 overflow-y-auto space-y-4"></div>
+        <div class="flex gap-2 mt-4">
+            <input id="msg-input" class="flex-1 p-3 bg-gray-900 rounded-lg" placeholder="Xabar...">
+            <button onclick="send()" class="bg-blue-600 px-6 rounded-lg">Yuborish</button>
         </div>
-
-        <p id="toggle-text" onclick="toggleMode()" class="mt-4 text-center text-blue-600 cursor-pointer hover:underline">
-            Account yo'qmi? Ochish
-        </p>
     </div>
 
     <script>
-        let isRegisterMode = false;
-
-        function toggleMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('title').innerText = isRegisterMode ? "Account ochish" : "Kirish";
-            document.getElementById('main-btn').innerText = isRegisterMode ? "Saqlash" : "Kirish";
-            document.getElementById('toggle-text').innerText = isRegisterMode ? "Kirishga qaytish" : "Account yo'qmi? Ochish";
+        let ws;
+        function connect() {
+            const name = document.getElementById('name').value;
+            ws = new WebSocket(`ws://localhost:8000/ws/${name}`);
+            document.getElementById('login-box').classList.add('hidden');
+            document.getElementById('chat-box').classList.remove('hidden');
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const msgList = document.getElementById('messages');
+                msgList.innerHTML += `
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <span class="font-bold text-blue-400">${data.sender} ${data.is_admin ? '<span class="text-red-500">[ADMIN]</span>' : ''}</span>: 
+                        ${data.text}
+                    </div>`;
+            };
         }
 
-        async function handleAuth() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if(!username || !password) {
-                alert("Iltimos, barcha maydonlarni to'ldiring!");
-                return;
-            }
-
-            // Backendga yuborish qismi (oldingi kodimizdagi kabi)
-            console.log(isRegisterMode ? "Registratsiya qilinyapti..." : "Kirilyapti...");
+        function send() {
+            const input = document.getElementById('msg-input');
+            ws.send(JSON.stringify({text: input.value}));
+            input.value = '';
         }
     </script>
 </body>
