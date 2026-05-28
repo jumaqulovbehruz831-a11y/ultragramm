@@ -1,46 +1,27 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <title>Hypershot Platform</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-black text-white h-screen flex flex-col">
-    <div id="login-box" class="m-auto p-8 bg-gray-900 rounded-2xl border border-gray-800">
-        <input id="name" placeholder="Ismingiz" class="w-full p-3 bg-black border border-gray-700 rounded-lg mb-4">
-        <button onclick="connect()" class="w-full bg-blue-600 p-3 rounded-lg font-bold">Kirish</button>
-    </div>
+<body>
+    <!-- Asosiy Layout -->
+    <div id="app">
+        <!-- 1. Telegram Chat Paneli -->
+        <div id="chat-sidebar">
+            <div class="chat-header">Hypershot Chat</div>
+            <div id="message-list"></div>
+            <input type="text" id="message-input" placeholder="Xabar yozing...">
+        </div>
 
-    <div id="chat-box" class="hidden flex-1 flex flex-col p-4">
-        <div id="messages" class="flex-1 overflow-y-auto space-y-4"></div>
-        <div class="flex gap-2 mt-4">
-            <input id="msg-input" class="flex-1 p-3 bg-gray-900 rounded-lg" placeholder="Xabar...">
-            <button onclick="send()" class="bg-blue-600 px-6 rounded-lg">Yuborish</button>
+        <!-- 2. Hypershot O'yin Paneli -->
+        <div id="game-container">
+            <canvas id="game-canvas"></canvas>
+            <div class="overlay">Hypershot O'yini</div>
         </div>
     </div>
 
-    <script>
-        let ws;
-        function connect() {
-            const name = document.getElementById('name').value;
-            ws = new WebSocket(`ws://localhost:8000/ws/${name}`);
-            document.getElementById('login-box').classList.add('hidden');
-            document.getElementById('chat-box').classList.remove('hidden');
-            
-            ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                const msgList = document.getElementById('messages');
-                msgList.innerHTML += `
-                    <div class="p-3 bg-gray-800 rounded-lg">
-                        <span class="font-bold text-blue-400">${data.sender} ${data.is_admin ? '<span class="text-red-500">[ADMIN]</span>' : ''}</span>: 
-                        ${data.text}
-                    </div>`;
-            };
-        }
-
-        function send() {
-            const input = document.getElementById('msg-input');
-            ws.send(JSON.stringify({text: input.value}));
-            input.value = '';
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
